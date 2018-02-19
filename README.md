@@ -1,56 +1,101 @@
 # **Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-<img src="examples/laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+## By: Emile Papillon
 
-Overview
+
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+**Finding Lane Lines on the Road**
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+The goals / steps of this project are the following:
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
-
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
-
-
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-
-1. Describe the pipeline
-
-2. Identify any shortcomings
-
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
 
 
-The Project
+
 ---
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+### Reflection
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/83ec35ee-1e02-48a5-bdb7-d244bd47c2dc/lessons/8c82408b-a217-4d09-b81d-1bda4c6380ef/concepts/4f1870e0-3849-43e4-b670-12e6f2d4b7a7) if you haven't already.
+### 1. Desription of the image processing pipeline. A short explanation of the purpose of each step is provided.
 
-**Step 2:** Open the code in a Jupyter Notebook
+My pipeline consisted of the following steps : 
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
+**1. Select a region of interest (ROI) and select pixel using a color threshold.** 
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
+<img src="./test/1-masked_edges/SolidYellowCurve2.jpg" width="400">
+<img src="./test/2-color_filtered_image/solidYellowCurve2.jpg" width="400">
 
-`> jupyter notebook`
+The ROI selection has a major impact on the outcome as the rest of the image contains patterns that could be picked up by the Hough algorithm as lines. However, this is also a potential shortcoming because a fixed ROI may not be suited for all the possible circumstances, such as a curve for example. In a curve, it is llikely that part of the road will fall outside of the ROI that was optimal for the particular conditions of this exercise. We could think of a way to adapt the ROI to the circumstances with an algorithm that detects situation as curves and adapt the ROI accordingly. 
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
+The color filtering also plays a major role. By using a similar approach to the one exposed during class, pixels with yellow or white hues are selected by setting the RGB filter threshold to (180, 180, 0). An obvious shortcoming of this method is that other colors such as the light yellow of faded yellow lane markers will not be picked up. 
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
+**2. Grayscale the image and apply a gaussian blur**
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+<img src="./test/3-grayscale/solidYellowCurve2.jpg" width="400">
+<img src="./test/4-blur_gaussian/solidYellowCurve2.jpg" width="400">
+
+The grayscaling here has limited impact on end result to the extent of my understanding, since we have already applied a color threshold that eliminated most of the pixels that were considered noise. The blurring of the image attenuates some pixel clusters that may have remained and could be interpreted as lines by the Hough transform --- such as the one seen along the left lane marking on the image --  without affecting interesting patterns such as lane markings.
+
+**Before and after gaussian : zoom on left lane in previous image**
+
+<img src="./test/4-blur_gaussian/gaussian_before.png" width="400">
+<img src="./test/4-blur_gaussian/gaussian_after.png" width="400">
+
+The previous image shows a close up of a region that displays a thin line-like pattern that could have been interpreted as a line by the Hough lane detection algorithm.
+
+**3. Apply Canny edges and run Hough on edges**
+
+<img src="./test/5-canny_edges/solidYellowCurve2.jpg" width="400">
+<img src="./test/6-hough_draw_lines/solidYellowCurve2.jpg" width="400">
+
+The Canny edge plays an important role in pattern recognition as it provides a mean to eliminate undesrired patterns by filtering using gradient. The patterns which are less sharp are removed, thus leaving the ones of interest.
+
+Hough was run using the following parameters : 
+
+* Rho  = 1
+* Theta = pi/180
+* Threshold = 35 
+* Min line length = 15
+* Max line gaps = 10
+
+Those loose parameters wouldn't have worked it if were not of the efficiency of the previous filtering techniques at removing most of the undesired pixels.  
+It was necessary to use such loose settings to pick up the smaller lane markers.
+ Otherwise, it would have been very difficult to have more than 1 lane markers on each sides, and this would have had a negative impact on the end result, resulting in less stable lines due to averaging the slope on a smaller sample size.  
+
+
+**4. Extrapolate lines and apply to original image**
+
+<img src="./test/7-hough_applied_to_original_image/solidYellowCurve2.jpg" width="400">
+<img src="./test/8-lines_extrapolate/solidYellowCurve2.jpg" width="400">
+
+In order to draw a single line on the left and right lanes, I modified the *draw_lines()* function by adding code to calculate the average slope of the right and left lines, then using this average slope I extrapolated the lines to extend them to the maximum and minimum (highest and lowest) points detected on either side. 
+
+The belogning of a given segment to the righ or left side was determined by using the sign of the slope ((y2-y1)/(x2-x1)).
+
+### 2. Identify potential shortcomings with your current pipeline
+
+This pipeline has many obvious shortcommings : 
+
+* Any line pattern on the road that has the following caracteristics will be picked up as a lane marker : 
+	* Is white or yellow
+	* Falls within the ROI
+	* Is linear in shape, does not need to be so long given the loose Hough parameters
+
+ In the second test video displaying a yellow solid lane marking on the left, there is a moment where a random horizontal white painting appears inside the ROI. This is picked up by the Hough algorithm and the averaged slope of the right marking jumps, making the line jerk as displayed in the following image :  
+
+<img src="./test_videos_output/BUG2.png" width="400">
+
+Image showing a white artefact fooling the algorithm into thinking there is an horizontal lane making. This affects the calculated average slope of the right line, making it jerk counterclockwise.
+
+Another shortcoming could be when the road is curved. This pipeline has no capability of making curved line markings.  Moreover, the current code cannot trace curves as it is using an y = m*x + b shape to extrapolate segments.
+
+It is also worth mentioning that I would not get in an autonomous car that uses extrapolation to approximate somethin as critical as lane markings. Better techniques such as machine learning would be better suited to identify the patterns without having to use that much extrapolation.
+
+### 3. Suggest possible improvements to your pipeline
+
+As discussed above, patterns that are similar in shape, color or location to lane markings are easliy picked up in the computation of lane lines. An idea to remove the jerk displayed in the image above would be to compare the slopes of line candidates and remove the ones that are outliers because they have very different slopes. 
+
+Also, we could adjust the ROI depending on the circumstances such as when in a curve. This would require to think of a mechanism to detect curves. To accurately trace lane markings in curves we would need to use a polynomial approximation instead of a line for extrapolation.  
 
