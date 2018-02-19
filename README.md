@@ -24,7 +24,7 @@ My pipeline consisted of the following steps :
 
 **1. Select a region of interest (ROI) and select pixel using a color threshold.** 
 
-<img src="./test/1-masked_edges/SolidYellowCurve2.jpg" width="400">
+<img src="./test/1-masked_edges/solidYellowCurve2.jpg" width="400">
 <img src="./test/2-color_filtered_image/solidYellowCurve2.jpg" width="400">
 
 The ROI selection has a major impact on the outcome as the rest of the image contains patterns that could be picked up by the Hough algorithm as lines. However, this is also a potential shortcoming because a fixed ROI may not be suited for all the possible circumstances, such as a curve for example. In a curve, it is llikely that part of the road will fall outside of the ROI that was optimal for the particular conditions of this exercise. We could think of a way to adapt the ROI to the circumstances with an algorithm that detects situation as curves and adapt the ROI accordingly. 
