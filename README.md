@@ -7,27 +7,27 @@
 
 **Finding Lane Lines on the Road**
 
+Finding lane marking is an essential task in achieving autonomous driving. This article looks at basic computer vision techniques to select relevant pixel in a 2D image. 
+
 The goals / steps of this project are the following:
 
-* Make a pipeline that finds lane lines on the road
-* Reflect on your work in a written report
-
-
+* Make a pipeline that finds lane lines on a straight road.
+* Use Canny edge detection, Hough transform and linear extrapolation to plot lane markings on an image using OpenCV.
 
 ---
 
-### Reflection
-
 ### 1. Desription of the image processing pipeline. A short explanation of the purpose of each step is provided.
 
-My pipeline consisted of the following steps : 
+First, using a polygon to extract a region of interest (ROI) will help filtering out some noise. Canny edge detection is not so good at selecting lane markings and it will pick up many straight segments in the image if those are not removed as potential lane marking candidates.
+
+Following this, a color threshold will be used to remove most of the pixels remaining that do not constitute lane marking segments. 
 
 **1. Select a region of interest (ROI) and select pixel using a color threshold.** 
 
 <img src="./test/1-masked_edges/solidYellowCurve2.jpg" width="400">
 <img src="./test/2-color_filtered_image/solidYellowCurve2.jpg" width="400">
 
-The ROI selection has a major impact on the outcome as the rest of the image contains patterns that could be picked up by the Hough algorithm as lines. However, this is also a potential shortcoming because a fixed ROI may not be suited for all the possible circumstances, such as a curve for example. In a curve, it is llikely that part of the road will fall outside of the ROI that was optimal for the particular conditions of this exercise. We could think of a way to adapt the ROI to the circumstances with an algorithm that detects situation as curves and adapt the ROI accordingly. 
+The ROI selection has a major impact on the outcome as the rest of the image contains patterns that could be picked up by the Hough algorithm as lines. However, this is also a potential shortcoming because a fixed ROI may not be suited for all the possible circumstances, such as a curve for example. 
 
 The color filtering also plays a major role. By using a similar approach to the one exposed during class, pixels with yellow or white hues are selected by setting the RGB filter threshold to (180, 180, 0). An obvious shortcoming of this method is that other colors such as the light yellow of faded yellow lane markers will not be picked up. 
 
